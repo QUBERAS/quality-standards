@@ -1,0 +1,55 @@
+name: Python Lint
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        type: string
+        default: "3.12"
+      ruff-version:
+        description: "Pin ruff version (empty = latest)"
+        type: string
+        default: ""
+      level:
+        description: "Enforcement level: minimal, standard, strict (empty = repo config)"
+        type: string
+        default: ""
+      rules:
+        description: "Ruff rule selectors — only used when level is empty"
+        type: string
+        default: "E,F,B"
+      continue-on-error:
+        description: "Allow failure (warn only)"
+        type: boolean
+        default: false
+
+jobs:
+  lint:
+    name: "Lint (ruff${{ inputs.level != '' && format(' {0}', inputs.level) || format(' {0}', inputs.rules) }})"
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ inputs.continue-on-error }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install ruff
+        run: pip install ${{ inputs.ruff-version && format('ruff=={0}', inputs.ruff-version) || 'ruff' }}
+
+      - name: Fetch level config
+        if: ${{ inputs.level != '' }}
+        uses: actions/checkout@v4
+        with:
+          repository: QUBERAS/quality-standards
+          path: .quality-standards
+          sparse-checkout: configs/python/levels/${{ inputs.level }}.toml
+
+      - name: Lint (level: ${{ inputs.level }})
+        if: ${{ inputs.level != '' }}
+        run: ruff check --config .quality-standards/configs/python/levels/${{ inputs.level }}.toml .
+
+      - name: Lint (repo config, rules: ${{ inputs.rules }})
+        if: ${{ inputs.level == '' }}
+        run: ruff check --select ${{ inputs.rules }} .

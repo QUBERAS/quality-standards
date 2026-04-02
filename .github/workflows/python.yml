@@ -1,0 +1,113 @@
+# Top-level Python quality workflow — composes individual checks.
+#
+# Enforcement levels (applied via ruff --config from this standards repo):
+#   minimal  — F, E only. Starting point for legacy repos.
+#   standard — F, E, W, B, S, I, UP. Recommended for active repos.
+#   strict   — All of the above + C90, N, D, ANN, TC, FA, PYI, Q.
+#
+# Repos choose their level. The level config is fetched from this standards repo
+# at CI time — repos cannot override the rules for their chosen level.
+# Repos CAN still add extra checks on top using their own pyproject.toml.
+#
+# Usage in consuming repo (.github/workflows/quality.yml):
+#
+#   name: Quality
+#   on:
+#     push:
+#       branches: [main, develop]
+#     pull_request:
+#       branches: ["**"]
+#   jobs:
+#     quality:
+#       uses: QUBERAS/quality-standards/.github/workflows/python.yml@main
+#       with:
+#         level: "standard"
+#         python-version: "3.12"
+#         requirements-file: "requirements.lock"
+#       secrets: inherit
+
+name: Python Quality
+
+on:
+  workflow_call:
+    inputs:
+      level:
+        description: "Enforcement level: minimal, standard, strict"
+        type: string
+        default: "standard"
+      python-version:
+        type: string
+        default: "3.12"
+      ruff-version:
+        description: "Pin ruff version (empty = latest)"
+        type: string
+        default: ""
+      requirements-file:
+        description: "Lock file for pip-audit (empty = skip)"
+        type: string
+        default: ""
+      typecheck-cmd:
+        description: "Type check command (empty = skip)"
+        type: string
+        default: ""
+      commitlint:
+        description: "Enforce conventional commits"
+        type: boolean
+        default: true
+      trivy-severity:
+        type: string
+        default: "CRITICAL,HIGH"
+
+jobs:
+  # ── Level-enforced checks (standards repo config) ─────────────────────────
+  format:
+    uses: ./.github/workflows/checks/python-format.yml
+    with:
+      python-version: ${{ inputs.python-version }}
+      ruff-version: ${{ inputs.ruff-version }}
+      level: ${{ inputs.level }}
+
+  lint:
+    uses: ./.github/workflows/checks/python-lint.yml
+    with:
+      python-version: ${{ inputs.python-version }}
+      ruff-version: ${{ inputs.ruff-version }}
+      level: ${{ inputs.level }}
+
+  # ── Language-agnostic checks ──────────────────────────────────────────────
+  secrets:
+    uses: ./.github/workflows/checks/secrets.yml
+    secrets: inherit
+
+  trivy:
+    uses: ./.github/workflows/checks/trivy.yml
+    with:
+      severity: ${{ inputs.trivy-severity }}
+
+  audit:
+    if: ${{ inputs.requirements-file != '' }}
+    uses: ./.github/workflows/checks/python-audit.yml
+    with:
+      python-version: ${{ inputs.python-version }}
+      requirements-file: ${{ inputs.requirements-file }}
+
+  commitlint:
+    if: ${{ inputs.commitlint }}
+    uses: ./.github/workflows/checks/commitlint.yml
+
+  # ── Repo-config checks (optional, non-blocking) ──────────────────────────
+  complexity:
+    uses: ./.github/workflows/checks/python-lint.yml
+    with:
+      python-version: ${{ inputs.python-version }}
+      ruff-version: ${{ inputs.ruff-version }}
+      rules: "C90"
+      continue-on-error: true
+
+  typecheck:
+    if: ${{ inputs.typecheck-cmd != '' }}
+    uses: ./.github/workflows/checks/python-typecheck.yml
+    with:
+      python-version: ${{ inputs.python-version }}
+      typecheck-cmd: ${{ inputs.typecheck-cmd }}
+      continue-on-error: true

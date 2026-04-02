@@ -1,0 +1,77 @@
+name: Trivy Scan
+
+on:
+  workflow_call:
+    inputs:
+      severity:
+        description: "Severity threshold"
+        type: string
+        default: "CRITICAL,HIGH"
+      exit-code:
+        description: "Exit code on findings (0 = warn only)"
+        type: string
+        default: "1"
+      scan-dockerfiles:
+        description: "Scan Dockerfiles for misconfigs"
+        type: boolean
+        default: true
+      scan-compose:
+        description: "Scan docker-compose files for misconfigs"
+        type: boolean
+        default: true
+
+jobs:
+  trivy-fs:
+    name: "CVE scan (filesystem)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: ${{ inputs.severity }}
+          exit-code: ${{ inputs.exit-code }}
+          ignore-unfixed: true
+          format: table
+
+  trivy-docker:
+    name: "Misconfig scan (Dockerfiles + Compose)"
+    if: ${{ inputs.scan-dockerfiles || inputs.scan-compose }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find config files
+        id: find
+        run: |
+          > /tmp/configs.txt
+          if [ "${{ inputs.scan-dockerfiles }}" = "true" ]; then
+            find . -name "Dockerfile*" -not -path "./.git/*" >> /tmp/configs.txt
+          fi
+          if [ "${{ inputs.scan-compose }}" = "true" ]; then
+            find . -name "docker-compose*.yml" -o -name "docker-compose*.yaml" \
+              -o -name "compose*.yml" -o -name "compose*.yaml" \
+              | grep -v ".git/" >> /tmp/configs.txt || true
+          fi
+          if [ -s /tmp/configs.txt ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "Found:"
+            cat /tmp/configs.txt
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Scan configs
+        if: steps.find.outputs.found == 'true'
+        run: |
+          EXIT=0
+          while IFS= read -r config; do
+            echo "--- Scanning: $config ---"
+            docker run --rm -v "$PWD:/repo" aquasec/trivy:latest config \
+              --severity "${{ inputs.severity }}" \
+              --exit-code "${{ inputs.exit-code }}" \
+              "/repo/$config" || EXIT=1
+          done < /tmp/configs.txt
+          exit $EXIT

@@ -1,0 +1,34 @@
+# Level: standard
+# Bugs + security + common footguns. Recommended for active repos.
+
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "B",   # bugbear — likely bugs
+    "S",   # bandit — security
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "S106",  # hardcoded-password-func-arg (false positives)
+    "S108",  # hardcoded-temp-file
+    "S311",  # non-cryptographic random
+]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S101"]
+"**/test_*.py" = ["S101"]
+"**/*_test.py" = ["S101"]
+"**/conftest.py" = ["S101"]
+"**/alembic/versions/*" = ["F401"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

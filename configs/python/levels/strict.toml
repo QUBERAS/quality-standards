@@ -1,0 +1,58 @@
+# Level: strict
+# Full suite — bugs, security, style, complexity, naming, types.
+# For repos that want maximum enforcement.
+
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "B",   # bugbear
+    "S",   # bandit
+    "I",   # isort
+    "UP",  # pyupgrade
+    "C90", # mccabe complexity
+    "N",   # pep8-naming
+    "Q",   # flake8-quotes
+    "ANN", # flake8-annotations
+    "TC",  # flake8-type-checking
+    "FA",  # flake8-future-annotations
+    "PYI", # flake8-pyi
+    "D",   # pydocstyle
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "D100",  # missing docstring in public module
+    "D104",  # missing docstring in public package
+    "D105",  # missing docstring in magic method
+    "D107",  # missing docstring in __init__
+    "S106",  # hardcoded-password-func-arg (false positives)
+    "S108",  # hardcoded-temp-file
+    "S311",  # non-cryptographic random
+]
+
+[lint.mccabe]
+max-complexity = 15
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.flake8-type-checking]
+strict = true
+quote-annotations = true
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S101", "D", "ANN", "TC"]
+"**/test_*.py" = ["S101", "D", "ANN", "TC"]
+"**/*_test.py" = ["S101", "D", "ANN", "TC"]
+"**/conftest.py" = ["S101", "D", "ANN", "TC"]
+"**/alembic/versions/*" = ["F401", "D", "N999", "UP"]
+"benchmarks/**" = ["S101", "D", "ANN", "TC"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
