@@ -136,10 +136,18 @@ This is a blessed escape hatch, not a workaround. Use it for WIP commits, then c
 ### Running checks locally
 
 ```bash
-# Run all checks on all files (same as CI)
+# Run all pre-commit hooks on all files
 make quality-check
-# or directly:
-pre-commit run --all-files
+
+# Lint at a specific level (matches what CI enforces)
+make lint-minimal     # F, E only
+make lint-standard    # F, E, W, B, S, I, UP (default)
+make lint-strict      # full suite
+make lint             # alias for lint-standard
+
+# Format
+make format           # auto-fix formatting
+make format-check     # check only (CI mode)
 ```
 
 ## Ruff config for IDE support
@@ -180,8 +188,11 @@ configs/
     CLAUDE.md                     # Claude Code project instructions template
     settings.local.json           # allowed/denied tool permissions
 
+scripts/
+  validate.py                     # config & workflow validation
+
 install.sh                        # one-liner bootstrap for consuming repos
-Makefile                          # quality-init, quality-check, quality-update
+Makefile                          # quality-init, quality-check, lint-*, format-*
 ```
 
 ## Adding a new language

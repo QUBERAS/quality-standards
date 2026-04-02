@@ -28,16 +28,20 @@ jobs:
 
       - name: Lint commits
         run: |
+          CONFIG=".quality-standards/configs/common/commitlint.config.js"
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             npx commitlint \
-              --config .quality-standards/configs/common/commitlint.config.js \
+              --config "$CONFIG" \
               --from "${{ github.event.pull_request.base.sha }}" \
               --to "${{ github.event.pull_request.head.sha }}" \
               --verbose
           else
-            npx commitlint \
-              --config .quality-standards/configs/common/commitlint.config.js \
-              --from "${{ github.event.before }}" \
-              --to HEAD \
-              --verbose
+            BEFORE="${{ github.event.before }}"
+            # On first push to a branch, before is all zeros — only lint HEAD
+            if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              npx commitlint --config "$CONFIG" --from HEAD~1 --to HEAD --verbose
+            else
+              npx commitlint --config "$CONFIG" --from "$BEFORE" --to HEAD --verbose
+            fi
           fi
