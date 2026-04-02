@@ -45,10 +45,10 @@ strict = true
 quote-annotations = true
 
 [lint.per-file-ignores]
-"**/tests/**" = ["S101", "D", "ANN", "TC"]
-"**/test_*.py" = ["S101", "D", "ANN", "TC"]
-"**/*_test.py" = ["S101", "D", "ANN", "TC"]
-"**/conftest.py" = ["S101", "D", "ANN", "TC"]
+"**/tests/**" = ["S101", "F811", "D", "ANN", "TC"]
+"**/test_*.py" = ["S101", "F811", "D", "ANN", "TC"]
+"**/*_test.py" = ["S101", "F811", "D", "ANN", "TC"]
+"**/conftest.py" = ["S101", "F811", "D", "ANN", "TC"]
 "**/alembic/versions/*" = ["F401", "D", "N999", "UP"]
 "benchmarks/**" = ["S101", "D", "ANN", "TC"]
 
