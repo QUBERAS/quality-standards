@@ -33,13 +33,15 @@ The validation script (`python3 scripts/validate.py`) checks: TOML/YAML syntax, 
 
 All workflows must live flat in `.github/workflows/` — GitHub requires reusable workflows at this path, no subdirectories.
 
+`python-lint.yml` has two modes: when `level` is set, it fetches the level config from this repo via sparse checkout; when `level` is empty, it uses the `rules` input for ad-hoc rule selectors (used by the complexity job with `rules: "C90"`).
+
 ### Level configs
 
 `configs/python/levels/{minimal,standard,strict}.toml` are ruff configs fetched by CI at runtime. Consuming repos **cannot override** their chosen level's rules — they can only add extra checks on top. `ruff.reference.toml` is the full reference config and must stay in sync with `strict.toml` (validated by `validate.py`).
 
 ### Bootstrap flow
 
-`install.sh` is the entry point for consuming repos. It downloads: `.pre-commit-config.yaml`, `commitlint.config.js`, `CLAUDE.md` (from `configs/claude/`), `.claude/settings.local.json`, and writes a starter CI workflow.
+`install.sh` is the entry point for consuming repos. It downloads: `.pre-commit-config.yaml` (from `configs/python/`), `commitlint.config.js` (from `configs/common/`), `CLAUDE.md` and `.claude/settings.local.json` (from `configs/claude/`), and writes a starter CI workflow. Safe to re-run — prompts before overwriting.
 
 ### Two CLAUDE.md files
 
