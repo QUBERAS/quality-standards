@@ -16,6 +16,7 @@ select = [
 ]
 ignore = [
     "E501",  # line too long (handled by formatter)
+    "E741",  # ambiguous variable name (false positives on short math/science vars)
     "S106",  # hardcoded-password-func-arg (false positives)
     "S108",  # hardcoded-temp-file
     "S311",  # non-cryptographic random

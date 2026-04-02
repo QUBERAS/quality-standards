@@ -11,6 +11,7 @@ select = [
 ]
 ignore = [
     "E501", # line too long (handled by formatter)
+    "E741", # ambiguous variable name (false positives on short math/science vars)
 ]
 
 [lint.per-file-ignores]
