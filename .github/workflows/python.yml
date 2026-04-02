@@ -61,14 +61,14 @@ on:
 jobs:
   # ── Level-enforced checks (standards repo config) ─────────────────────────
   format:
-    uses: ./.github/workflows/python-format.yml
+    uses: QUBERAS/quality-standards/.github/workflows/python-format.yml@main
     with:
       python-version: ${{ inputs.python-version }}
       ruff-version: ${{ inputs.ruff-version }}
       level: ${{ inputs.level }}
 
   lint:
-    uses: ./.github/workflows/python-lint.yml
+    uses: QUBERAS/quality-standards/.github/workflows/python-lint.yml@main
     with:
       python-version: ${{ inputs.python-version }}
       ruff-version: ${{ inputs.ruff-version }}
@@ -76,28 +76,27 @@ jobs:
 
   # ── Language-agnostic checks ──────────────────────────────────────────────
   secrets:
-    uses: ./.github/workflows/secrets.yml
-    secrets: inherit
+    uses: QUBERAS/quality-standards/.github/workflows/secrets.yml@main
 
   trivy:
-    uses: ./.github/workflows/trivy.yml
+    uses: QUBERAS/quality-standards/.github/workflows/trivy.yml@main
     with:
       severity: ${{ inputs.trivy-severity }}
 
   audit:
     if: ${{ inputs.requirements-file != '' }}
-    uses: ./.github/workflows/python-audit.yml
+    uses: QUBERAS/quality-standards/.github/workflows/python-audit.yml@main
     with:
       python-version: ${{ inputs.python-version }}
       requirements-file: ${{ inputs.requirements-file }}
 
   commitlint:
     if: ${{ inputs.commitlint }}
-    uses: ./.github/workflows/commitlint.yml
+    uses: QUBERAS/quality-standards/.github/workflows/commitlint.yml@main
 
   # ── Repo-config checks (optional, non-blocking) ──────────────────────────
   complexity:
-    uses: ./.github/workflows/python-lint.yml
+    uses: QUBERAS/quality-standards/.github/workflows/python-lint.yml@main
     with:
       python-version: ${{ inputs.python-version }}
       ruff-version: ${{ inputs.ruff-version }}
@@ -106,7 +105,7 @@ jobs:
 
   typecheck:
     if: ${{ inputs.typecheck-cmd != '' }}
-    uses: ./.github/workflows/python-typecheck.yml
+    uses: QUBERAS/quality-standards/.github/workflows/python-typecheck.yml@main
     with:
       python-version: ${{ inputs.python-version }}
       typecheck-cmd: ${{ inputs.typecheck-cmd }}

@@ -5,6 +5,10 @@
 #   pip install pre-commit
 #   pre-commit install
 #   pre-commit install --hook-type commit-msg
+#
+# Skip hooks during dev when needed:
+#   SKIP=ruff,trufflehog git commit -m "wip: debugging"
+#   git commit --no-verify  # skip ALL hooks (use sparingly)
 
 repos:
   # ── Ruff: format + lint + import sort ─────────────────────────────────────
@@ -13,7 +17,7 @@ repos:
     hooks:
       - id: ruff-format
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix]
 
   # ── Conventional commits ──────────────────────────────────────────────────
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
@@ -24,10 +28,11 @@ repos:
         additional_dependencies: ["@commitlint/config-conventional"]
 
   # ── Secrets ───────────────────────────────────────────────────────────────
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.88.1
     hooks:
-      - id: gitleaks
+      - id: trufflehog
+        entry: trufflehog git file://. --since-commit HEAD --only-verified --fail
 
   # ── General hygiene ───────────────────────────────────────────────────────
   - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -28,7 +28,14 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install project dependencies
-        run: pip install -e ".[dev]" 2>/dev/null || pip install -e . 2>/dev/null || true
+        run: |
+          if pip install -e ".[dev]"; then
+            echo "Installed with [dev] extras"
+          elif pip install -e .; then
+            echo "Installed without extras"
+          else
+            echo "::warning::No installable package found — type checker may report missing imports"
+          fi
 
       - name: Type check
         run: ${{ inputs.typecheck-cmd }}

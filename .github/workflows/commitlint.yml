@@ -12,6 +12,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch commitlint config
+        uses: actions/checkout@v4
+        with:
+          repository: QUBERAS/quality-standards
+          path: .quality-standards
+          sparse-checkout: configs/common/commitlint.config.js
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -23,9 +30,14 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             npx commitlint \
+              --config .quality-standards/configs/common/commitlint.config.js \
               --from "${{ github.event.pull_request.base.sha }}" \
               --to "${{ github.event.pull_request.head.sha }}" \
               --verbose
           else
-            npx commitlint --from HEAD~1 --to HEAD --verbose
+            npx commitlint \
+              --config .quality-standards/configs/common/commitlint.config.js \
+              --from "${{ github.event.before }}" \
+              --to HEAD \
+              --verbose
           fi

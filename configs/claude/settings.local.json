@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(pre-commit run:*)",
+      "Bash(ruff check:*)",
+      "Bash(ruff format:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(make quality-check:*)",
+      "Bash(pip install:*)",
+      "Bash(chmod +x:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Bash(git commit --no-verify:*)",
+      "Bash(curl * | bash:*)",
+      "Bash(curl * | sh:*)"
+    ]
+  }
+}
