@@ -18,15 +18,14 @@ Repos can still add extra checks on top via their own `pyproject.toml` (complexi
 
 ```
 .github/workflows/
-  python.yml                      # top-level Python workflow (composes checks)
-  checks/
-    python-format.yml             # ruff format --check
-    python-lint.yml               # ruff check (configurable rules or level)
-    python-typecheck.yml          # ty / mypy / pyright
-    python-audit.yml              # pip-audit
-    secrets.yml                   # gitleaks
-    trivy.yml                     # CVE + misconfig (deps, Dockerfiles, Compose)
-    commitlint.yml                # conventional commits
+  python.yml                      # top-level Python workflow (composes all checks)
+  python-format.yml               # ruff format --check
+  python-lint.yml                 # ruff check (configurable rules or level)
+  python-typecheck.yml            # ty / mypy / pyright
+  python-audit.yml                # pip-audit
+  secrets.yml                     # gitleaks
+  trivy.yml                       # CVE + misconfig (deps, Dockerfiles, Compose)
+  commitlint.yml                  # conventional commits
 
 configs/
   python/
@@ -92,7 +91,7 @@ Call checks independently for custom composition:
 ```yaml
 jobs:
   lint:
-    uses: QUBERAS/quality-standards/.github/workflows/checks/python-lint.yml@main
+    uses: QUBERAS/quality-standards/.github/workflows/python-lint.yml@main
     with:
       level: "standard"
       python-version: "3.12"
@@ -103,7 +102,7 @@ Or use repo config with explicit rules:
 ```yaml
 jobs:
   complexity:
-    uses: QUBERAS/quality-standards/.github/workflows/checks/python-lint.yml@main
+    uses: QUBERAS/quality-standards/.github/workflows/python-lint.yml@main
     with:
       rules: "C90"
       continue-on-error: true

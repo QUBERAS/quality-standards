@@ -61,14 +61,14 @@ on:
 jobs:
   # ── Level-enforced checks (standards repo config) ─────────────────────────
   format:
-    uses: ./.github/workflows/checks/python-format.yml
+    uses: ./.github/workflows/python-format.yml
     with:
       python-version: ${{ inputs.python-version }}
       ruff-version: ${{ inputs.ruff-version }}
       level: ${{ inputs.level }}
 
   lint:
-    uses: ./.github/workflows/checks/python-lint.yml
+    uses: ./.github/workflows/python-lint.yml
     with:
       python-version: ${{ inputs.python-version }}
       ruff-version: ${{ inputs.ruff-version }}
@@ -76,28 +76,28 @@ jobs:
 
   # ── Language-agnostic checks ──────────────────────────────────────────────
   secrets:
-    uses: ./.github/workflows/checks/secrets.yml
+    uses: ./.github/workflows/secrets.yml
     secrets: inherit
 
   trivy:
-    uses: ./.github/workflows/checks/trivy.yml
+    uses: ./.github/workflows/trivy.yml
     with:
       severity: ${{ inputs.trivy-severity }}
 
   audit:
     if: ${{ inputs.requirements-file != '' }}
-    uses: ./.github/workflows/checks/python-audit.yml
+    uses: ./.github/workflows/python-audit.yml
     with:
       python-version: ${{ inputs.python-version }}
       requirements-file: ${{ inputs.requirements-file }}
 
   commitlint:
     if: ${{ inputs.commitlint }}
-    uses: ./.github/workflows/checks/commitlint.yml
+    uses: ./.github/workflows/commitlint.yml
 
   # ── Repo-config checks (optional, non-blocking) ──────────────────────────
   complexity:
-    uses: ./.github/workflows/checks/python-lint.yml
+    uses: ./.github/workflows/python-lint.yml
     with:
       python-version: ${{ inputs.python-version }}
       ruff-version: ${{ inputs.ruff-version }}
@@ -106,7 +106,7 @@ jobs:
 
   typecheck:
     if: ${{ inputs.typecheck-cmd != '' }}
-    uses: ./.github/workflows/checks/python-typecheck.yml
+    uses: ./.github/workflows/python-typecheck.yml
     with:
       python-version: ${{ inputs.python-version }}
       typecheck-cmd: ${{ inputs.typecheck-cmd }}
