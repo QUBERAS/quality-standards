@@ -99,6 +99,62 @@ jobs:
       continue-on-error: true
 ```
 
+## Commit message convention
+
+All repos use [Conventional Commits](https://www.conventionalcommits.org/). Enforced by commitlint in CI and pre-commit hooks.
+
+### Format
+
+```
+<type>(<scope>): <subject>
+```
+
+- **type** (required): one of the types below
+- **scope** (optional): module or area affected, e.g. `auth`, `api`, `deps`
+- **subject** (required): lowercase, no trailing period, max 100 chars
+
+### Allowed types
+
+| Type | When to use |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `refactor` | Code change that neither fixes a bug nor adds a feature |
+| `docs` | Documentation only |
+| `test` | Adding or updating tests |
+| `chore` | Maintenance (deps, configs, tooling) |
+| `ci` | CI/CD changes |
+| `perf` | Performance improvement |
+| `style` | Formatting, whitespace (no logic change) |
+| `build` | Build system or external dependencies |
+| `revert` | Reverting a previous commit |
+
+### Examples
+
+```
+feat(trading): add stop-loss order type
+fix(auth): handle expired JWT correctly
+chore(deps): bump ruff to 0.8.0
+refactor: extract validation into shared module
+ci: add typecheck to quality workflow
+```
+
+### What NOT to do
+
+```
+# No type — commitlint will reject
+updated readme
+
+# Uppercase subject
+feat: Add new endpoint
+
+# Trailing period
+fix: resolve null pointer.
+
+# Too vague
+fix: fixed stuff
+```
+
 ## Branch strategy
 
 - **`main` / `develop`**: CI runs on push — these are the branches that matter for compliance.
