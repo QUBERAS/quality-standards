@@ -2,19 +2,63 @@
 
 Get your Python repo compliant with QUBERAS quality standards in three steps: check where you stand, wire up CI, then raise the bar over time.
 
-## 1. Check compliance right now
+## 1. Run every check locally (before touching CI)
 
-No install needed — just run ruff against a level config from this repo:
+No install needed beyond pip. This runs the same checks CI will run — so you see exactly what will pass or fail.
+
+### Quick setup
 
 ```bash
-# Pick a level and check your code
-pip install ruff
-curl -fsSL https://raw.githubusercontent.com/QUBERAS/quality-standards/main/configs/python/levels/minimal.toml -o /tmp/qs-level.toml
-ruff check --config /tmp/qs-level.toml .
-ruff format --check --config /tmp/qs-level.toml .
+pip install ruff pre-commit
+curl -fsSL https://raw.githubusercontent.com/QUBERAS/quality-standards/main/configs/python/levels/standard.toml -o /tmp/qs-level.toml
 ```
 
-Replace `minimal` with `standard` or `strict` to see what each level catches.
+Replace `standard` with `minimal` or `strict` depending on the level you're targeting.
+
+### Run each check
+
+```bash
+# ── Lint (are there code issues?) ──────────────────────────────────────────
+ruff check --config /tmp/qs-level.toml .
+
+# ── Format (is the code formatted correctly?) ─────────────────────────────
+ruff format --check --config /tmp/qs-level.toml .
+
+# ── Secrets (any leaked keys/tokens?) ──────────────────────────────────────
+# Requires docker OR: pip install trufflehog (Go binary, see https://github.com/trufflesecurity/trufflehog)
+trufflehog git file://. --since-commit HEAD --only-verified --fail
+
+# ── CVE scan (known vulnerabilities in your deps?) ────────────────────────
+# Install trivy: brew install trivy (mac) or see https://github.com/aquasecurity/trivy
+trivy fs --scanners vuln --severity CRITICAL,HIGH .
+
+# ── Dependency audit (are your pinned deps safe?) ─────────────────────────
+pip install pip-audit
+pip-audit -r requirements.txt   # or requirements.lock
+```
+
+### Auto-fix what you can
+
+```bash
+ruff check --fix --config /tmp/qs-level.toml .    # fix lint violations
+ruff format --config /tmp/qs-level.toml .          # reformat code
+```
+
+### See how bad it is at each level
+
+```bash
+QS="https://raw.githubusercontent.com/QUBERAS/quality-standards/main/configs/python/levels"
+
+# Check all three levels — see exactly how many violations each one adds
+for level in minimal standard strict; do
+  echo "=== $level ==="
+  curl -fsSL "$QS/$level.toml" -o /tmp/qs-$level.toml
+  ruff check --config /tmp/qs-$level.toml --statistics . 2>&1 | tail -20
+  echo ""
+done
+```
+
+Pick the level where you can fix everything in a reasonable timeframe. Start there.
 
 ### What the levels enforce
 
@@ -27,6 +71,22 @@ Replace `minimal` with `standard` or `strict` to see what each level catches.
 Start wherever your code is clean. Most repos begin at `minimal` or `standard`.
 
 ## 2. Add CI and local hooks
+
+### Should you enable pre-commit hooks?
+
+Pre-commit hooks run checks **on every commit** before it's created. They catch issues early but add friction during development.
+
+**Use pre-commit hooks if:**
+- Your team commits directly to main/develop (no PR workflow)
+- You want instant feedback without pushing and waiting for CI
+- You care about clean git history (every commit passes checks, not just the PR)
+
+**Skip pre-commit hooks (CI-only) if:**
+- You iterate fast with WIP commits and clean up before PR
+- Your team already has a strong PR review process
+- You find hooks annoying — CI catches the same things on PR
+
+Both options enforce the same rules. Pre-commits are a convenience, not a requirement. You can always add them later.
 
 ### Option A: Full bootstrap (recommended)
 
@@ -41,6 +101,12 @@ This sets up:
 - `commitlint.config.js` — conventional commit rules
 - `.github/workflows/quality.yml` — CI workflow calling the shared checks
 - Pre-commit hooks installed locally
+
+To verify hooks work, run them on all files before your first commit:
+
+```bash
+pre-commit run --all-files
+```
 
 Review and commit the generated files, then edit `.github/workflows/quality.yml` to match your repo:
 
@@ -94,6 +160,16 @@ jobs:
 | Complexity (C90) | no | warns only |
 | Type check | no | set `typecheck-cmd` to enable |
 | Commitlint | configurable | `commitlint: true/false` |
+
+### Run all checks at once (with or without pre-commit)
+
+If you installed pre-commit, this runs every hook on your entire codebase:
+
+```bash
+pre-commit run --all-files
+```
+
+Without pre-commit, run the checks individually as shown in [section 1](#1-run-every-check-locally-before-touching-ci).
 
 ## 3. Level up progressively
 
