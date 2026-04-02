@@ -27,7 +27,12 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install ruff
-        run: pip install ${{ inputs.ruff-version && format('ruff=={0}', inputs.ruff-version) || 'ruff' }}
+        run: |
+          if [ -n "${{ inputs.ruff-version }}" ]; then
+            pip install "ruff==${{ inputs.ruff-version }}"
+          else
+            pip install ruff
+          fi
 
       - name: Fetch level config
         if: ${{ inputs.level != '' }}
@@ -37,10 +42,10 @@ jobs:
           path: .quality-standards
           sparse-checkout: configs/python/levels/${{ inputs.level }}.toml
 
-      - name: Check formatting (level: ${{ inputs.level }})
+      - name: Check formatting with enforced config
         if: ${{ inputs.level != '' }}
-        run: ruff format --check --config .quality-standards/configs/python/levels/${{ inputs.level }}.toml .
+        run: ruff format --check --config ".quality-standards/configs/python/levels/${{ inputs.level }}.toml" .
 
-      - name: Check formatting (repo config)
+      - name: Check formatting with repo config
         if: ${{ inputs.level == '' }}
         run: ruff format --check .

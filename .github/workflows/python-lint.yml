@@ -25,7 +25,7 @@ on:
 
 jobs:
   lint:
-    name: "Lint (ruff${{ inputs.level != '' && format(' {0}', inputs.level) || format(' {0}', inputs.rules) }})"
+    name: "Lint (ruff)"
     runs-on: ubuntu-latest
     continue-on-error: ${{ inputs.continue-on-error }}
     steps:
@@ -36,7 +36,12 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install ruff
-        run: pip install ${{ inputs.ruff-version && format('ruff=={0}', inputs.ruff-version) || 'ruff' }}
+        run: |
+          if [ -n "${{ inputs.ruff-version }}" ]; then
+            pip install "ruff==${{ inputs.ruff-version }}"
+          else
+            pip install ruff
+          fi
 
       - name: Fetch level config
         if: ${{ inputs.level != '' }}
@@ -46,10 +51,10 @@ jobs:
           path: .quality-standards
           sparse-checkout: configs/python/levels/${{ inputs.level }}.toml
 
-      - name: Lint (level: ${{ inputs.level }})
+      - name: Lint with enforced config
         if: ${{ inputs.level != '' }}
-        run: ruff check --config .quality-standards/configs/python/levels/${{ inputs.level }}.toml .
+        run: ruff check --config ".quality-standards/configs/python/levels/${{ inputs.level }}.toml" .
 
-      - name: Lint (repo config, rules: ${{ inputs.rules }})
+      - name: Lint with repo config
         if: ${{ inputs.level == '' }}
-        run: ruff check --select ${{ inputs.rules }} .
+        run: ruff check --select "${{ inputs.rules }}" .
