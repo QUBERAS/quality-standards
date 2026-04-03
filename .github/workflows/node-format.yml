@@ -1,0 +1,33 @@
+name: Node Format
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "20"
+
+jobs:
+  format:
+    name: "Format (prettier)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch prettier config
+        uses: actions/checkout@v4
+        with:
+          repository: QUBERAS/quality-standards
+          path: .quality-standards
+          sparse-checkout: configs/node/.prettierrc.json
+
+      - name: Check formatting
+        run: npx prettier --check --config .quality-standards/configs/node/.prettierrc.json "src/**/*.{ts,tsx,js,jsx,mjs,css,json}"

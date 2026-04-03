@@ -1,0 +1,82 @@
+# Top-level Node.js quality workflow — composes individual checks.
+#
+# Repos use their own ESLint config (framework-specific: Next.js, React, etc.)
+# and quality-standards provides the formatter config and security scanning.
+#
+# Usage in consuming repo (.github/workflows/quality.yml):
+#
+#   name: Quality
+#   on:
+#     push:
+#       branches: [main, develop]
+#     pull_request:
+#       branches: ["**"]
+#   jobs:
+#     quality:
+#       uses: QUBERAS/quality-standards/.github/workflows/node.yml@main
+#       with:
+#         node-version: "20"
+#         audit: true
+#         typecheck: true
+#       secrets: inherit
+
+name: Node Quality
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "20"
+      audit:
+        description: "Run npm audit for dependency vulnerabilities"
+        type: boolean
+        default: true
+      typecheck:
+        description: "Run tsc --noEmit for type checking"
+        type: boolean
+        default: true
+      commitlint:
+        description: "Enforce conventional commits on PR titles"
+        type: boolean
+        default: true
+      trivy-severity:
+        type: string
+        default: "CRITICAL,HIGH"
+
+jobs:
+  # ── Code quality checks ────────────────────────────────────────────────────
+  lint:
+    uses: QUBERAS/quality-standards/.github/workflows/node-lint.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}
+
+  format:
+    uses: QUBERAS/quality-standards/.github/workflows/node-format.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}
+
+  # ── Language-agnostic checks ───────────────────────────────────────────────
+  secrets:
+    uses: QUBERAS/quality-standards/.github/workflows/secrets.yml@main
+
+  trivy:
+    uses: QUBERAS/quality-standards/.github/workflows/trivy.yml@main
+    with:
+      severity: ${{ inputs.trivy-severity }}
+
+  audit:
+    if: ${{ inputs.audit }}
+    uses: QUBERAS/quality-standards/.github/workflows/node-audit.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}
+
+  commitlint:
+    if: ${{ inputs.commitlint }}
+    uses: QUBERAS/quality-standards/.github/workflows/commitlint.yml@main
+
+  typecheck:
+    if: ${{ inputs.typecheck }}
+    uses: QUBERAS/quality-standards/.github/workflows/node-typecheck.yml@main
+    with:
+      node-version: ${{ inputs.node-version }}

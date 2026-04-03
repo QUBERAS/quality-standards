@@ -1,0 +1,46 @@
+name: Node Typecheck
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "20"
+      typecheck-cmd:
+        description: "Command to run (default: next build for Next.js, tsc --noEmit otherwise)"
+        type: string
+        default: ""
+      continue-on-error:
+        description: "Allow failure (warn only)"
+        type: boolean
+        default: false
+
+jobs:
+  typecheck:
+    name: "Type check"
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ inputs.continue-on-error }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: |
+          CMD="${{ inputs.typecheck-cmd }}"
+          if [ -z "$CMD" ]; then
+            # Auto-detect: Next.js uses `next build` which includes tsc
+            if [ -f "next.config.ts" ] || [ -f "next.config.js" ] || [ -f "next.config.mjs" ]; then
+              CMD="npx tsc --noEmit"
+            else
+              CMD="npx tsc --noEmit"
+            fi
+          fi
+          echo "Running: $CMD"
+          $CMD

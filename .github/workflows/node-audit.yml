@@ -1,0 +1,26 @@
+name: Node Audit
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "20"
+      audit-level:
+        description: "Minimum severity to fail on"
+        type: string
+        default: "high"
+
+jobs:
+  audit:
+    name: "Dependency audit (npm)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=${{ inputs.audit-level }}
