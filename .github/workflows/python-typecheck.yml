@@ -30,17 +30,10 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install project dependencies
-        run: |
-          if uv pip install -e ".[dev]" --system; then
-            echo "Installed with [dev] extras"
-          elif uv pip install -e . --system; then
-            echo "Installed without extras"
-          else
-            echo "::warning::No installable package found — type checker may report missing imports"
-          fi
+        run: uv sync --all-groups --inexact 2>/dev/null || uv sync --inexact 2>/dev/null || echo "::warning::No uv project found — type checker may report missing imports"
 
       - name: Install type checker
-        run: uv pip install ty --system
+        run: uv pip install ty
 
       - name: Type check
-        run: ${{ inputs.typecheck-cmd }}
+        run: uv run ${{ inputs.typecheck-cmd }}
