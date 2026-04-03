@@ -16,7 +16,7 @@ Investigation into GitHub Actions billing and whether merging workflows would re
 | trivy (docker) | trivy.yml | yes (conditional skip) | trivy |
 | audit | python-audit.yml | if audit: true (default) | uv |
 | commitlint | commitlint.yml | if commitlint: true (PR only) | node, commitlint |
-| typecheck | python-typecheck.yml | if typecheck-cmd set | python, type checker |
+| typecheck | python-typecheck.yml | yes (ty check default, pass "" to skip) | uv, python, ty |
 
 Each job independently boots a runner, checks out the repo, and installs its tools — ~40-60s setup overhead per job.
 

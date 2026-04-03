@@ -118,7 +118,7 @@ jobs:
       level: "minimal"                              # start here
       python-version: "3.12"
       # audit: true                                  # requires uv.lock in repo
-      # typecheck-cmd: "ty check"                   # uncomment for type checking
+      # typecheck-cmd: ""                            # ty check runs by default — pass "" to skip
       commitlint: true
     secrets: inherit
 ```
@@ -158,7 +158,7 @@ jobs:
 | CVE scan (trivy) | yes | `trivy-severity` input (default: CRITICAL,HIGH) |
 | Dependency audit (uv) | yes | `audit: true` (default), requires `uv.lock` |
 | Complexity (C90) | no | warns only |
-| Type check | no | set `typecheck-cmd` to enable |
+| Type check (ty) | yes | `typecheck-cmd: "ty check"` (default), pass `""` to skip |
 | PR title (conventional) | configurable | `commitlint: true/false`, PR-only |
 
 ### Run all checks at once (with or without pre-commit)

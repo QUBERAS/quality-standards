@@ -115,7 +115,7 @@ jobs:
       level: "standard"
       python-version: "3.12"
       # audit: true                              # requires uv.lock in repo
-      # typecheck-cmd: "ty check"               # uncomment for type checking
+      # typecheck-cmd: ""                        # ty check runs by default — pass "" to skip
     secrets: inherit
 YAML
   ok "Wrote $WORKFLOW_FILE"

@@ -28,8 +28,8 @@ The validation script (`python3 scripts/validate.py`) checks: TOML/YAML syntax, 
 ### Workflow composition
 
 `python.yml` is the top-level reusable workflow. It composes individual check workflows that all run in parallel:
-- **Merge-blocking**: `python-format.yml`, `python-lint.yml`, `secrets.yml`, `trivy.yml`, `python-audit.yml` (if audit enabled), `commitlint.yml` (PR title only, if enabled)
-- **Non-blocking**: complexity (C90 via python-lint.yml with `continue-on-error`), typecheck (if typecheck-cmd provided)
+- **Merge-blocking**: `python-format.yml`, `python-lint.yml`, `python-typecheck.yml` (ty check by default, pass `""` to skip), `secrets.yml`, `trivy.yml`, `python-audit.yml` (if audit enabled), `commitlint.yml` (PR title only, if enabled)
+- **Non-blocking**: complexity (C90 via python-lint.yml with `continue-on-error`)
 
 All workflows must live flat in `.github/workflows/` — GitHub requires reusable workflows at this path, no subdirectories.
 
