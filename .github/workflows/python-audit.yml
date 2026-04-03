@@ -6,24 +6,15 @@ on:
       python-version:
         type: string
         default: "3.12"
-      requirements-file:
-        description: "Lock file path for pip-audit"
-        type: string
-        required: true
 
 jobs:
   audit:
-    name: "Dependency audit (pip-audit)"
+    name: "Dependency audit (uv)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ inputs.python-version }}
-
-      - name: Install pip-audit
-        run: pip install pip-audit
+      - uses: astral-sh/setup-uv@v5
 
       - name: Audit
-        run: pip-audit -r "${{ inputs.requirements-file }}"
+        run: uv audit

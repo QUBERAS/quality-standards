@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Shared CI quality workflows and configs for all QUBERAS org repos. Consuming repos call reusable GitHub Actions workflows from here and get ruff lint/format, secret scanning, CVE scanning, pip-audit, type checking, and commitlint — all controlled by enforcement levels (minimal/standard/strict).
+Shared CI quality workflows and configs for all QUBERAS org repos. Consuming repos call reusable GitHub Actions workflows from here and get ruff lint/format, secret scanning, CVE scanning, uv audit, type checking, and commitlint — all controlled by enforcement levels (minimal/standard/strict).
 
 This is a **standards repo, not an application**. Changes here affect every QUBERAS repo that uses these workflows.
 
@@ -28,7 +28,7 @@ The validation script (`python3 scripts/validate.py`) checks: TOML/YAML syntax, 
 ### Workflow composition
 
 `python.yml` is the top-level reusable workflow. It composes individual check workflows that all run in parallel:
-- **Merge-blocking**: `python-format.yml`, `python-lint.yml`, `secrets.yml`, `trivy.yml`, `python-audit.yml` (if requirements-file provided), `commitlint.yml` (if enabled)
+- **Merge-blocking**: `python-format.yml`, `python-lint.yml`, `secrets.yml`, `trivy.yml`, `python-audit.yml` (if audit enabled), `commitlint.yml` (PR title only, if enabled)
 - **Non-blocking**: complexity (C90 via python-lint.yml with `continue-on-error`), typecheck (if typecheck-cmd provided)
 
 All workflows must live flat in `.github/workflows/` — GitHub requires reusable workflows at this path, no subdirectories.
@@ -53,5 +53,5 @@ All workflows must live flat in `.github/workflows/` — GitHub requires reusabl
 - Action uses in workflows must be pinned to version tags (never @master or @latest)
 - No relative workflow refs (`uses: ./`) — consuming repos call these with full `QUBERAS/quality-standards/.github/workflows/...@main`
 - Level configs must use `line-length = 120` and include a `[format]` section
-- Commits follow Conventional Commits: `<type>(<scope>): <subject>` — lowercase subject, no trailing period, max 100 chars
+- Commits follow Conventional Commits: `<type>(<scope>): <subject>` — no trailing period, max 100 chars
 - When adding a new language: create `configs/<language>/levels/`, check workflows, and a top-level composer workflow, keeping the same level names

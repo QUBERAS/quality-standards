@@ -38,10 +38,10 @@ Start with `minimal`, move to `standard` when clean. The goal is progress, not p
 | Lint (ruff) | yes | level config |
 | Secrets (trufflehog) | yes | always on |
 | CVE scan (trivy) | yes | `trivy-severity` input |
-| Dependency audit | yes | omit `requirements-file` to skip |
+| Dependency audit (uv) | yes | `audit: true` (default), requires `uv.lock` |
 | Complexity (C90) | no | repo's pyproject.toml |
 | Type check | no | omit `typecheck-cmd` to skip |
-| Commitlint | configurable | `commitlint: true/false` |
+| PR title (conventional) | configurable | `commitlint: true/false`, PR-only |
 
 ## CI workflow usage
 
@@ -67,13 +67,13 @@ jobs:
     with:
       level: "standard"
       python-version: "3.12"
-      requirements-file: "requirements.lock"
+      audit: true
       typecheck-cmd: "ty check"
       commitlint: true
     secrets: inherit
 ```
 
-All checks run in parallel. Only `secrets: inherit` is needed if you don't use pip-audit — the other checks don't require secrets.
+All checks run in parallel. `secrets: inherit` is only needed if your checks require repo secrets.
 
 ### Individual checks
 
@@ -111,7 +111,7 @@ All repos use [Conventional Commits](https://www.conventionalcommits.org/). Enfo
 
 - **type** (required): one of the types below
 - **scope** (optional): module or area affected, e.g. `auth`, `api`, `deps`
-- **subject** (required): lowercase, no trailing period, max 100 chars
+- **subject** (required): no trailing period, max 100 chars
 
 ### Allowed types
 
@@ -145,9 +145,6 @@ ci: add typecheck to quality workflow
 # No type — commitlint will reject
 updated readme
 
-# Uppercase subject
-feat: Add new endpoint
-
 # Trailing period
 fix: resolve null pointer.
 
@@ -172,7 +169,6 @@ Install hooks (done automatically by `install.sh`):
 ```bash
 pip install pre-commit
 pre-commit install
-pre-commit install --hook-type commit-msg
 ```
 
 ### Skipping hooks during dev
@@ -225,7 +221,7 @@ Copy the relevant `[tool.ruff]` sections into your `pyproject.toml`. Adjust `lin
   python-format.yml               # ruff format --check
   python-lint.yml                 # ruff check (configurable rules or level)
   python-typecheck.yml            # ty / mypy / pyright
-  python-audit.yml                # pip-audit
+  python-audit.yml                # uv audit
   secrets.yml                     # trufflehog (free for private repos)
   trivy.yml                       # CVE + misconfig (deps, Dockerfiles, Compose)
   commitlint.yml                  # conventional commits

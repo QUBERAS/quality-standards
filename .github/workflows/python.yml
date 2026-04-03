@@ -23,7 +23,7 @@
 #       with:
 #         level: "standard"
 #         python-version: "3.12"
-#         requirements-file: "requirements.lock"
+#         audit: true
 #       secrets: inherit
 
 name: Python Quality
@@ -42,10 +42,10 @@ on:
         description: "Pin ruff version (empty = latest)"
         type: string
         default: ""
-      requirements-file:
-        description: "Lock file for pip-audit (empty = skip)"
-        type: string
-        default: ""
+      audit:
+        description: "Run uv audit for dependency vulnerabilities (requires uv.lock)"
+        type: boolean
+        default: true
       typecheck-cmd:
         description: "Type check command (empty = skip)"
         type: string
@@ -84,11 +84,10 @@ jobs:
       severity: ${{ inputs.trivy-severity }}
 
   audit:
-    if: ${{ inputs.requirements-file != '' }}
+    if: ${{ inputs.audit }}
     uses: QUBERAS/quality-standards/.github/workflows/python-audit.yml@main
     with:
       python-version: ${{ inputs.python-version }}
-      requirements-file: ${{ inputs.requirements-file }}
 
   commitlint:
     if: ${{ inputs.commitlint }}

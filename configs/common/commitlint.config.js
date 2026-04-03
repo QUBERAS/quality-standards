@@ -29,7 +29,7 @@ module.exports = {
     ],
     "header-max-length": [2, "always", 100],
     "subject-full-stop": [2, "never", "."],
-    "subject-case": [2, "always", "lower-case"],
+    "subject-case": [0],
     "scope-case": [1, "always", "lower-case"],
   },
 };

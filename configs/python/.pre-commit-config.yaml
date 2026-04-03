@@ -4,8 +4,6 @@
 # Setup:
 #   pip install pre-commit
 #   pre-commit install
-#   pre-commit install --hook-type commit-msg
-#
 # Skip hooks during dev when needed:
 #   SKIP=ruff,trufflehog git commit -m "wip: debugging"
 #   git commit --no-verify  # skip ALL hooks (use sparingly)
@@ -18,14 +16,6 @@ repos:
       - id: ruff-format
       - id: ruff
         args: [--fix]
-
-  # ── Conventional commits ──────────────────────────────────────────────────
-  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v9.18.0
-    hooks:
-      - id: commitlint
-        stages: [commit-msg]
-        additional_dependencies: ["@commitlint/config-conventional"]
 
   # ── Secrets ───────────────────────────────────────────────────────────────
   - repo: https://github.com/trufflesecurity/trufflehog

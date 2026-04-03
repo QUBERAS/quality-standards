@@ -114,7 +114,7 @@ jobs:
     with:
       level: "standard"
       python-version: "3.12"
-      # requirements-file: "requirements.lock"  # uncomment for pip-audit
+      # audit: true                              # requires uv.lock in repo
       # typecheck-cmd: "ty check"               # uncomment for type checking
     secrets: inherit
 YAML
@@ -125,13 +125,12 @@ fi
 if command -v pre-commit &>/dev/null; then
   info "Installing pre-commit hooks..."
   pre-commit install
-  pre-commit install --hook-type commit-msg
   ok "Pre-commit hooks installed"
 else
   warn "pre-commit not found. Install it first:"
   warn "  pip install pre-commit"
   warn "Then run:"
-  warn "  pre-commit install && pre-commit install --hook-type commit-msg"
+  warn "  pre-commit install"
 fi
 
 echo ""

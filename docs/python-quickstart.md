@@ -33,8 +33,8 @@ trufflehog git file://. --since-commit HEAD --only-verified --fail
 trivy fs --scanners vuln --severity CRITICAL,HIGH .
 
 # ── Dependency audit (are your pinned deps safe?) ─────────────────────────
-pip install pip-audit
-pip-audit -r requirements.txt   # or requirements.lock
+# Requires uv (https://docs.astral.sh/uv/) and a uv.lock in the project
+uv audit
 ```
 
 ### Auto-fix what you can
@@ -97,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/QUBERAS/quality-standards/main/inst
 ```
 
 This sets up:
-- `.pre-commit-config.yaml` — ruff format + lint, trufflehog secrets, commitlint, general hygiene hooks
+- `.pre-commit-config.yaml` — ruff format + lint, trufflehog secrets, general hygiene hooks
 - `commitlint.config.js` — conventional commit rules
 - `.github/workflows/quality.yml` — CI workflow calling the shared checks
 - Pre-commit hooks installed locally
@@ -117,7 +117,7 @@ jobs:
     with:
       level: "minimal"                              # start here
       python-version: "3.12"
-      # requirements-file: "requirements.lock"      # uncomment for pip-audit
+      # audit: true                                  # requires uv.lock in repo
       # typecheck-cmd: "ty check"                   # uncomment for type checking
       commitlint: true
     secrets: inherit
@@ -156,10 +156,10 @@ jobs:
 | Lint (ruff) | yes | level config |
 | Secrets (trufflehog) | yes | always on |
 | CVE scan (trivy) | yes | `trivy-severity` input (default: CRITICAL,HIGH) |
-| Dependency audit (pip-audit) | yes | set `requirements-file` to enable |
+| Dependency audit (uv) | yes | `audit: true` (default), requires `uv.lock` |
 | Complexity (C90) | no | warns only |
 | Type check | no | set `typecheck-cmd` to enable |
-| Commitlint | configurable | `commitlint: true/false` |
+| PR title (conventional) | configurable | `commitlint: true/false`, PR-only |
 
 ### Run all checks at once (with or without pre-commit)
 

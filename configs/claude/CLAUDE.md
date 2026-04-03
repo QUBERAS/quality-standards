@@ -6,7 +6,7 @@ This repo follows QUBERAS quality standards. Before committing:
 - Code must pass `pre-commit run --all-files` (ruff format + lint, trufflehog, commitlint)
 - Commits must follow Conventional Commits: `<type>(<scope>): <subject>`
   - Types: feat, fix, chore, docs, refactor, test, ci, perf, revert, style, build
-  - Subject: lowercase, no trailing period, max 100 chars
+  - Subject: no trailing period, max 100 chars
 - Do not disable or weaken ruff rules — the CI level config is authoritative
 - Do not commit secrets, credentials, or .env files
 
