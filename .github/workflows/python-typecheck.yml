@@ -13,7 +13,7 @@ on:
       continue-on-error:
         description: "Allow failure (warn only)"
         type: boolean
-        default: true
+        default: false
 
 jobs:
   typecheck:
@@ -23,19 +23,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: astral-sh/setup-uv@v5
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python-version }}
 
       - name: Install project dependencies
         run: |
-          if pip install -e ".[dev]"; then
+          if uv pip install -e ".[dev]" --system; then
             echo "Installed with [dev] extras"
-          elif pip install -e .; then
+          elif uv pip install -e . --system; then
             echo "Installed without extras"
           else
             echo "::warning::No installable package found — type checker may report missing imports"
           fi
+
+      - name: Install type checker
+        run: uv pip install ty --system
 
       - name: Type check
         run: ${{ inputs.typecheck-cmd }}

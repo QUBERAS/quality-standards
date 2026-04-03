@@ -24,6 +24,7 @@
 #         level: "standard"
 #         python-version: "3.12"
 #         audit: true
+#         typecheck-cmd: "ty check"   # default — pass "" to skip
 #       secrets: inherit
 
 name: Python Quality
@@ -49,7 +50,7 @@ on:
       typecheck-cmd:
         description: "Type check command (empty = skip)"
         type: string
-        default: ""
+        default: "ty check"
       commitlint:
         description: "Enforce conventional commits"
         type: boolean
@@ -108,4 +109,4 @@ jobs:
     with:
       python-version: ${{ inputs.python-version }}
       typecheck-cmd: ${{ inputs.typecheck-cmd }}
-      continue-on-error: true
+      continue-on-error: false

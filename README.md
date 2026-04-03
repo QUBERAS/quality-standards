@@ -40,7 +40,7 @@ Start with `minimal`, move to `standard` when clean. The goal is progress, not p
 | CVE scan (trivy) | yes | `trivy-severity` input |
 | Dependency audit (uv) | yes | `audit: true` (default), requires `uv.lock` |
 | Complexity (C90) | no | repo's pyproject.toml |
-| Type check | no | omit `typecheck-cmd` to skip |
+| Type check (ty) | yes | `typecheck-cmd: "ty check"` (default), pass `""` to skip |
 | PR title (conventional) | configurable | `commitlint: true/false`, PR-only |
 
 ## CI workflow usage
