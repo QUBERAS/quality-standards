@@ -1,8 +1,10 @@
 # Node.js quickstart
 
-Get your Node.js repo compliant with QUBERAS quality standards. Works the same whether it's a Next.js full-stack app, a standalone React frontend, or a plain Express backend — each repo calls the same reusable workflow.
+Get your Node.js repo compliant with QUBERAS quality standards in four steps: run checks locally, add pre-commit hooks, wire up CI, then enforce it on PRs.
 
-## 1. Run every check locally (before touching CI)
+Works the same whether it's a Next.js full-stack app, a standalone React frontend, or a plain Express backend — each repo calls the same reusable workflow.
+
+## Step 1. Run checks locally
 
 ### Quick setup
 
@@ -45,9 +47,49 @@ npx eslint --fix .
 npx prettier --write --config /tmp/qs-prettier.json "src/**/*.{ts,tsx,js,jsx,mjs,css,json}"
 ```
 
-## 2. Add CI
+## Step 2. Add pre-commit hooks (optional)
 
-Create `.github/workflows/quality.yml`:
+Pre-commit hooks run checks on every commit before it's created. For Node.js projects, you can use [husky](https://typicode.github.io/husky/) + [lint-staged](https://github.com/lint-staged/lint-staged):
+
+### Install
+
+```bash
+npm install --save-dev husky lint-staged
+npx husky init
+```
+
+### Configure lint-staged
+
+Add to `package.json`:
+
+```json
+{
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs}": ["eslint --fix", "prettier --write"],
+    "*.{css,json,md}": ["prettier --write"]
+  }
+}
+```
+
+### Wire up the hook
+
+```bash
+echo "npx lint-staged" > .husky/pre-commit
+```
+
+### Skip hooks when needed
+
+```bash
+git commit --no-verify -m "wip: debugging"    # skip all hooks
+```
+
+Hooks are optional. CI enforces the same rules. Use hooks if you want instant feedback; skip them if you find them annoying.
+
+## Step 3. Add the CI workflow
+
+This makes quality checks run automatically on every push and PR — but doesn't block merging yet.
+
+### Create `.github/workflows/quality.yml`
 
 ```yaml
 name: Quality
@@ -72,10 +114,12 @@ jobs:
     secrets: inherit
 ```
 
+Commit and push. The workflow will run on the next push or PR.
+
 ### What runs in CI
 
-| Check | Tool | Blocks merge | How to control |
-|-------|------|-------------|----------------|
+| Check | Tool | Blocks merge (step 4) | How to control |
+|-------|------|-----------------------|----------------|
 | Lint | ESLint (project config) | yes | project's eslint.config.mjs |
 | Format | Prettier (quality-standards config) | yes | always on |
 | Type check | tsc --noEmit | yes | `typecheck: true/false` |
@@ -84,7 +128,45 @@ jobs:
 | CVE scan | Trivy | yes | `trivy-severity` input (default: CRITICAL,HIGH) |
 | PR title | commitlint | yes (PR only) | `commitlint: true/false` |
 
-## 3. Framework-specific ESLint configs
+### Run manually via workflow_dispatch
+
+To also allow manual runs from the Actions tab, add `workflow_dispatch`:
+
+```yaml
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: ["**"]
+```
+
+## Step 4. Make it block merges
+
+The workflow from step 3 runs and reports results, but doesn't prevent merging if checks fail. To enforce it, configure branch protection rules in GitHub.
+
+See [org-level-branch-enforcement.md](org-level-branch-enforcement.md) for full instructions, but the short version:
+
+### Per-repo setup (quick)
+
+1. Go to **Settings → Branches → Add branch protection rule** (or **Settings → Rules → Rulesets**)
+2. Branch name pattern: `main`
+3. Enable **Require status checks to pass before merging**
+4. Add these status checks (they appear after the workflow has run at least once):
+   - `quality / lint / Lint (eslint)`
+   - `quality / format / Format (prettier)`
+   - `quality / typecheck / Type check`
+   - `quality / secrets / Secrets (trufflehog)`
+   - `quality / trivy / CVE scan (filesystem)`
+   - `quality / audit / Dependency audit (npm)` (if audit enabled)
+   - `quality / commitlint / PR title (conventional commits)` (if commitlint enabled)
+5. Save
+
+### Org-level setup (recommended)
+
+Use org-level rulesets to enforce across all QUBERAS repos. See [org-level-branch-enforcement.md](org-level-branch-enforcement.md).
+
+## Framework-specific ESLint configs
 
 The quality-standards workflows run `npx eslint .` — they use whatever ESLint config your project ships. Here's what to use for common setups:
 
@@ -175,15 +257,9 @@ export default [
 npm install --save-dev eslint @eslint/js
 ```
 
-## 4. Split repos (separate frontend + backend)
+## Split repos (separate frontend + backend)
 
-If your project is split across two repos (e.g. `myapp-frontend` and `myapp-backend`), each repo gets its own `quality.yml` calling `node.yml` independently. No special configuration needed — each repo has its own:
-
-- `eslint.config.mjs` — framework-appropriate rules (Next.js for frontend, plain TS for backend)
-- `tsconfig.json` — project-specific TypeScript config
-- `package.json` + `package-lock.json` — own dependency tree
-
-The CI checks are identical. The only difference is which ESLint plugins each repo installs.
+If your project is split across two repos (e.g. `myapp-frontend` and `myapp-backend`), each repo gets its own `quality.yml` calling `node.yml` independently. No special configuration needed — each repo has its own ESLint config, tsconfig, and package.json.
 
 ```
 myapp-frontend/
@@ -199,19 +275,10 @@ myapp-backend/
 
 ## Prettier config
 
-CI fetches the prettier config from quality-standards automatically. For local IDE support, you can copy it into your repo:
+CI fetches the prettier config from quality-standards automatically. For local IDE support, copy it into your repo:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/QUBERAS/quality-standards/main/configs/node/.prettierrc.json -o .prettierrc.json
 ```
 
 The config enforces: double quotes, semicolons, 120 char line width, trailing commas, LF line endings.
-
-## Skipping checks during dev
-
-```bash
-SKIP=eslint git commit -m "wip: debugging"   # skip specific pre-commit hooks (if installed)
-git commit --no-verify                         # skip all hooks
-```
-
-CI enforces on PR — clean up before opening one.
