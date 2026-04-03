@@ -45,14 +45,27 @@ convention = "google"
 [lint.flake8-type-checking]
 strict = true
 quote-annotations = true
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pydantic.BaseSettings",
+    "pydantic.RootModel",
+    "pydantic_settings.BaseSettings",
+]
+runtime-evaluated-decorators = [
+    "pydantic.field_validator",
+    "pydantic.model_validator",
+    "pydantic.validator",
+    "pydantic.root_validator",
+]
 
 [lint.per-file-ignores]
-"**/tests/**" = ["S101", "F811", "D", "ANN", "TC"]
-"**/test_*.py" = ["S101", "F811", "D", "ANN", "TC"]
-"**/*_test.py" = ["S101", "F811", "D", "ANN", "TC"]
-"**/conftest.py" = ["S101", "F811", "D", "ANN", "TC"]
-"**/alembic/versions/*" = ["F401", "D", "N999", "UP"]
-"benchmarks/**" = ["S101", "D", "ANN", "TC"]
+"**/tests/**" = ["S101", "D", "ANN", "TC", "F811", "N812", "B017", "B023"]
+"**/test_*.py" = ["S101", "D", "ANN", "TC", "F811", "N812", "B017", "B023"]
+"**/*_test.py" = ["S101", "D", "ANN", "TC", "F811", "N812", "B017", "B023"]
+"**/conftest.py" = ["S101", "D", "ANN", "TC", "F811"]
+"**/alembic/versions/*" = ["D", "N999", "UP"]
+"benchmarks/**" = ["S101", "D", "ANN", "TC", "S110", "S310", "S608", "B007", "C901", "N", "E741"]
+"src/profiling/**" = ["S101", "D", "ANN", "TC", "S110", "N", "C901"]
 
 [format]
 quote-style = "double"
